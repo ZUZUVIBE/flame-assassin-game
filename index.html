@@ -3,80 +3,75 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>The Flame Assassin [Fixed]</title>
+    <title>The Flame Assassin</title>
     <style>
         body {
-            background-color: #1e1e26;
+            background-color: #1a1a24;
             color: #ffffff;
             font-family: Arial, sans-serif;
             text-align: center;
             margin: 0;
-            padding: 20px;
+            padding: 10px;
         }
         #game-container {
             max-width: 400px;
             margin: 0 auto;
-            background: #1f1f2b;
+            background: #222230;
             border: 2px solid #ff7200;
-            border-radius: 10px;
-            padding: 20px;
-            box-shadow: 0 0 15px rgba(255, 114, 0, 0.4);
+            border-radius: 12px;
+            padding: 15px;
+            box-shadow: 0 0 20px rgba(255, 114, 0, 0.3);
         }
-        h2 { color: #ff7200; font-size: 18px; margin-bottom: 5px; }
-        .hud { font-size: 13px; color: #cccccc; margin: 8px 0; }
-        .status { font-size: 13px; color: #00ff66; min-height: 40px; margin: 10px 0; font-weight: bold; background: #252536; padding: 8px; border-radius: 5px;}
-        input[type="text"] {
-            width: 85%;
-            padding: 8px;
-            margin: 8px 0;
-            background: #2a2a3b;
-            border: 1px solid #444;
-            color: #fff;
-            border-radius: 5px;
-        }
+        h2 { color: #ff7200; font-size: 18px; margin: 5px 0 12px 0; }
+        .hud { font-size: 12px; color: #ffcc00; margin: 6px 0; background: #15151c; padding: 6px; border-radius: 6px; }
+        .status { font-size: 12px; color: #00ff66; margin: 10px 0; font-weight: bold; background: #15151c; padding: 8px; border-radius: 6px; min-height: 30px;}
         button {
-            width: 90%;
+            width: 100%;
             padding: 10px;
-            margin: 6px 0;
+            margin: 5px 0;
             border: none;
-            border-radius: 5px;
+            border-radius: 6px;
             font-weight: bold;
             cursor: pointer;
             color: white;
-            transition: 0.2s;
+            font-size: 13px;
+            transition: 0.1s;
         }
         button:active { transform: scale(0.98); }
-        .btn-login { background-color: #ff7200; }
-        .btn-photo { background-color: #0066cc; }
+        .btn-shop { background-color: #9c27b0; }
+        .btn-stealth { background-color: #009688; }
+        .btn-friends { background-color: #3f51b5; }
+        .btn-love { background-color: #e91e63; }
+        
         .action-box {
-            background: #252536;
+            background: #15151c;
             border: 2px dashed #ff7200;
-            padding: 20px;
-            margin-top: 15px;
+            padding: 15px;
+            margin-top: 10px;
             border-radius: 8px;
             cursor: pointer;
             user-select: none;
         }
-        .action-box:active { background: #33334d; }
+        .action-box:active { background: #2a2a3b; }
     </style>
 </head>
 <body>
 
 <div id="game-container">
-    <h2>THE FLAME ASSASSIN</h2>
-    <div class="hud" id="hud-id">ID: Loading... | Coins: 150 🪙</div>
-    <div class="hud" id="hud-score">Score: 0 | Level: 1</div>
+    <h2>🔥 THE FLAME ASSASSIN 🔥</h2>
+    <div class="hud" id="hud-main">ID: Loading... | Coins: 150 🪙 | ☀️ Sunny</div>
+    <div class="hud" id="hud-stats">Radar: Secure 🟢 | Rank: Rookie Assassin 🥉</div>
     
-    <input type="text" id="username" placeholder="Enter Your Name">
-    <br>
-    <button class="btn-login" onclick="handleLogin()">1. Login ID</button>
-    <button class="btn-photo" onclick="verifyPhoto()">2. Verify Photo ID</button>
+    <button class="btn-shop" onclick="openShop()">🛍️ Flame Shop (Upgrade: 50 🪙)</button>
+    <button class="btn-stealth" onclick="toggleStealth()">👤 Toggle Stealth / Disguise</button>
+    <button class="btn-friends" onclick="syncFriends()">🌐 Sync Online Friends</button>
+    <button class="btn-love" onclick="loveChoice()">❤️ Love Story Choice</button>
     
-    <div class="action-box" onclick="tapAction()">
-        🎯 <b>TAP HERE TO ATTACK / PLAY</b>
+    <div class="action-box" onclick="playGame()">
+        🎯 <b style="font-size: 15px;">TAP HERE TO ATTACK / PLAY</b>
     </div>
     
-    <div class="status" id="status-msg">Status: Enter name & click Login to start!</div>
+    <div class="status" id="status-msg">Status: System Online. Tap target to play!</div>
 </div>
 
 <script>
@@ -84,55 +79,62 @@
         gamerId: "Assassin_" + Math.floor(1000 + Math.random() * 9000),
         score: 0,
         level: 1,
-        currency: 150,
-        username: "",
-        isLoggedIn: false,
-        hasPhotoId: false
+        coins: 150,
+        stealthMode: false,
+        powerUps: 0
     };
 
-    function updateHUD() {
-        document.getElementById("hud-id").innerText = `ID: ${game.gamerId} | Coins: ${game.currency}🪙`;
-        document.getElementById("hud-score").innerText = `Score: ${game.score} | Level: ${game.level}`;
+    function updateUI() {
+        document.getElementById("hud-main").innerText = `ID: ${game.gamerId} | Coins: ${game.coins} 🪙 | Score: ${game.score}`;
+        document.getElementById("hud-stats").innerText = `Radar: Secure 🟢 | Level: ${game.level} | Power: ${game.powerUps}`;
     }
 
-    function handleLogin() {
-        let val = document.getElementById("username").value.trim();
-        if (val !== "") {
-            game.username = val;
-            game.isLoggedIn = true;
-            document.getElementById("status-msg").innerText = `Success! Logged in as ${val}. Now click Verify Photo ID.`;
-        } else {
-            document.getElementById("status-msg").innerText = `⚠️ Pehle box mein naam toh likho bhai!`;
-        }
-    }
-
-    function verifyPhoto() {
-        if (!game.isLoggedIn) {
-            document.getElementById("status-msg").innerText = `⚠️ Pehle Login ID karo!`;
-            return;
-        }
-        game.hasPhotoId = true;
-        document.getElementById("status-msg").innerText = `🎉 Verified! Ab niche Target par tap karke khelo!`;
-    }
-
-    function tapAction() {
-        if (!game.isLoggedIn || !game.hasPhotoId) {
-            document.getElementById("status-msg").innerText = `⚠️ Pehle Login aur Verify karo!`;
-            return;
-        }
+    function playGame() {
         game.score += 1;
-        game.currency += 5;
+        game.coins += 10;
         
-        if (game.score % 5 === 0) {
+        if(game.score % 5 === 0) {
             game.level += 1;
-            document.getElementById("status-msg").innerText = `⚡ LEVEL UP! Level ${game.level} reached! Score: ${game.score}`;
+            document.getElementById("status-msg").innerText = `⚡ LEVEL UP! Reached Level ${game.level}!`;
         } else {
-            document.getElementById("status-msg").innerText = `🔥 Attack Successful! Score: ${game.score}`;
+            document.getElementById("status-msg").innerText = `🔥 Attack successful! +10 Coins earned!`;
         }
-        updateHUD();
+        updateUI();
     }
 
-    updateHUD();
+    function openShop() {
+        if(game.coins >= 50) {
+            game.coins -= 50;
+            game.powerUps += 1;
+            document.getElementById("status-msg").innerText = `🛒 Shop Upgrade Purchased! Power-ups: ${game.powerUps}`;
+        } else {
+            document.getElementById("status-msg").innerText = `⚠️ Not enough coins! Need 50 🪙.`;
+        }
+        updateUI();
+    }
+
+    function toggleStealth() {
+        game.stealthMode = !game.stealthMode;
+        let modeStr = game.stealthMode ? "ACTIVE (Invisible to Enemies)" : "OFF";
+        document.getElementById("status-msg").innerText = `👤 Stealth Mode is now ${modeStr}`;
+    }
+
+    function syncFriends() {
+        let randomFriends = Math.floor(3 + Math.random() * 8);
+        document.getElementById("status-msg").innerText = `🌐 Synced! ${randomFriends} online assassin friends active near you.`;
+    }
+
+    function loveChoice() {
+        let choices = [
+            "❤️ Alliance formed with rival assassin shadow!",
+            "💔 Choice declined: Mission comes first, no distractions.",
+            "💖 Secret letter received from the target informant!"
+        ];
+        let randomStory = choices[Math.floor(Math.random() * choices.length)];
+        document.getElementById("status-msg").innerText = randomStory;
+    }
+
+    updateUI();
 </script>
 
 </body>
