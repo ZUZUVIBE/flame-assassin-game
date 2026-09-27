@@ -1,98 +1,592 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>The Flame Assassin - Multiplayer</title>
-    <style>
-        body {
-            background-color: #121218;
-            color: #ffffff;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            text-align: center;
-            margin: 0;
-            padding: 15px;
-        }
-        .container {
-            max-width: 420px;
-            margin: 0 auto;
-            background: #1a1a24;
-            border: 2px solid #ff5500;
-            border-radius: 14px;
-            padding: 20px;
-            box-shadow: 0 0 25px rgba(255, 85, 0, 0.4);
-        }
-        h2 { color: #ff5500; margin-bottom: 10px; }
-        .box { background: #222230; padding: 12px; border-radius: 8px; margin: 10px 0; font-size: 14px; }
-        input { width: 80%; padding: 10px; margin: 5px 0; background: #2a2a3b; border: 1px solid #444; color: #fff; border-radius: 6px; text-align: center; font-size: 16px; }
-        button { width: 90%; padding: 12px; margin: 6px 0; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; color: white; font-size: 14px; transition: 0.2s; }
-        button:active { transform: scale(0.97); }
-        .btn-main { background-color: #ff5500; }
-        .btn-room { background-color: #0088ff; }
-        .btn-action { background-color: #00aa44; font-size: 16px; padding: 18px; margin-top: 15px; border: 2px dashed #fff; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Flame Assassin</title>
+
+<style>
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    min-height: 100vh;
+    background: #0b0b0f;
+    color: #fff;
+    font-family: Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+.game-wrapper {
+    width: 100%;
+    max-width: 430px;
+    background: #14141f;
+    border: 2px solid #ff5500;
+    border-radius: 16px;
+    padding: 22px;
+    box-shadow: 0 0 25px rgba(255,85,0,.3);
+}
+
+h1 {
+    color: #ff5500;
+    text-align: center;
+    font-size: 24px;
+    margin: 0 0 20px;
+}
+
+.panel {
+    background: #1c1c2b;
+    border-radius: 10px;
+    padding: 14px;
+    margin-bottom: 15px;
+    border: 1px solid #2a2a40;
+}
+
+.stats-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    font-size: 14px;
+    font-weight: bold;
+    color: #ffcc00;
+    margin-bottom: 8px;
+}
+
+.status {
+    text-align: center;
+    color: #00ff66;
+    font-size: 13px;
+    margin-top: 8px;
+}
+
+.btn {
+    width: 100%;
+    border: 0;
+    border-radius: 10px;
+    padding: 15px;
+    margin-bottom: 12px;
+    font-size: 16px;
+    font-weight: bold;
+    color: white;
+    background: linear-gradient(135deg,#ff5500,#ff2200);
+    cursor: pointer;
+}
+
+.btn:active {
+    transform: scale(.98);
+}
+
+.secondary {
+    background: #252538;
+    border: 1px solid #00ff66;
+    color: #00ff66;
+}
+
+#console-log {
+    background: #0d0d14;
+    color: #00ff66;
+    font-family: monospace;
+    font-size: 12px;
+    padding: 12px;
+    border-radius: 8px;
+    height: 90px;
+    overflow-y: auto;
+    border: 1px solid #1f1f2e;
+}
+
+.hidden {
+    display: none;
+}
+
+.auth-box {
+    text-align: center;
+}
+
+input {
+    width: 100%;
+    padding: 13px;
+    margin-bottom: 10px;
+    border-radius: 8px;
+    border: 1px solid #33334a;
+    background: #0d0d14;
+    color: white;
+    font-size: 15px;
+    outline: none;
+}
+
+input:focus {
+    border-color: #ff5500;
+}
+
+.small {
+    color: #aaa;
+    font-size: 12px;
+    margin-bottom: 15px;
+}
+</style>
 </head>
+
 <body>
 
-<div class="container">
-    <h2>🔥 THE FLAME ASSASSIN 🔥</h2>
-    <div class="box" id="user-info">ID: Connecting...</div>
-    
-    <div class="box">
-        <b>🌐 Online Friends & Rooms</b><br>
-        <input type="text" id="room-input" placeholder="Enter Room Code (e.g. 1234)">
-        <button class="btn-room" onclick="joinRoom()">Join Friend's Room</button>
-        <button class="btn-room" onclick="createRoom()" style="background-color: #9c27b0;">Create New Room</button>
+<div class="game-wrapper">
+
+    <!-- LOGIN -->
+    <div id="auth-screen" class="auth-box">
+        <h1>🔥 FLAME ASSASSIN 🔥</h1>
+
+        <p class="small">
+            Create your player account to enter the game.
+        </p>
+
+        <input id="username" type="text" maxlength="20"
+               placeholder="Enter username">
+
+        <input id="password" type="password"
+               placeholder="Enter password">
+
+        <button class="btn" id="signup-btn">
+            CREATE ACCOUNT
+        </button>
+
+        <button class="btn secondary" id="login-btn">
+            LOGIN
+        </button>
+
+        <div id="auth-message" class="small"></div>
     </div>
 
-    <button class="btn-action" onclick="hitTarget()">🎯 TAP HERE TO ATTACK!</button>
-    
-    <div class="box" id="game-stats">
-        Score: 0 | Coins: 100 🪙 | Room: Solo
+
+    <!-- GAME -->
+    <div id="game-screen" class="hidden">
+
+        <h1>🔥 FLAME ASSASSIN 🔥</h1>
+
+        <div class="panel">
+
+            <div class="stats-row">
+                <span id="player-name">Player</span>
+                <span id="player-score">Score: 0</span>
+            </div>
+
+            <div class="stats-row">
+                <span id="player-coins">Coins: 180 🪙</span>
+                <span id="player-power">Power: Level 1</span>
+            </div>
+
+            <div class="status">
+                🟢 Online system ready
+            </div>
+
+        </div>
+
+        <button class="btn" id="attack-btn">
+            🎯 TAP HERE TO ATTACK!
+        </button>
+
+        <button class="btn secondary" id="shop-btn">
+            🛍️ OPEN FLAME SHOP — 50 🪙
+        </button>
+
+        <button class="btn secondary" id="online-btn">
+            🌐 PLAY ONLINE
+        </button>
+
+        <button class="btn secondary" id="logout-btn">
+            LOG OUT
+        </button>
+
+        <div id="console-log">
+            &gt; Game initialized successfully...
+        </div>
+
     </div>
-    <div id="log-msg" style="color: #00ff66; font-size: 13px; font-weight: bold; margin-top: 10px;">Status: Ready for action!</div>
+
 </div>
 
 <script>
-    // Unique ID generation without annoying forms
-    let myId = "Assassin_" + Math.floor(1000 + Math.random() * 9000);
-    let score = 0;
-    let coins = 100;
-    let currentRoom = "Solo";
+"use strict";
 
-    document.getElementById("user-info").innerText = `My ID: ${myId}`;
+/*
+    FLAME ASSASSIN
+    Stable frontend version.
 
-    function updateDisplay() {
-        document.getElementById("game-stats").innerText = `Score: ${score} | Coins: ${coins} 🪙 | Room: ${currentRoom}`;
+    NOTE:
+    Real multiplayer requires a backend/realtime service.
+    This version intentionally does NOT fake a server connection.
+*/
+
+const STORAGE_KEY = "flame_assassin_accounts";
+const SESSION_KEY = "flame_assassin_session";
+
+let gameData = {
+    username: "",
+    score: 0,
+    coins: 180,
+    powerLevel: 1
+};
+
+
+/* ---------------------------
+   SAFE STORAGE
+---------------------------- */
+
+function getAccounts() {
+    try {
+        return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
+    } catch (error) {
+        console.error(error);
+        return {};
+    }
+}
+
+function saveAccounts(accounts) {
+    localStorage.setItem(
+        STORAGE_KEY,
+        JSON.stringify(accounts)
+    );
+}
+
+
+/* ---------------------------
+   UI HELPERS
+---------------------------- */
+
+function $(id) {
+    return document.getElementById(id);
+}
+
+function show(element) {
+    element.classList.remove("hidden");
+}
+
+function hide(element) {
+    element.classList.add("hidden");
+}
+
+function setAuthMessage(message) {
+    $("auth-message").textContent = message;
+}
+
+function logMessage(message) {
+
+    const box = $("console-log");
+
+    const line = document.createElement("div");
+    line.textContent = "> " + message;
+
+    box.appendChild(line);
+
+    box.scrollTop = box.scrollHeight;
+}
+
+
+/* ---------------------------
+   GAME UI
+---------------------------- */
+
+function updateGameUI() {
+
+    $("player-name").textContent =
+        gameData.username;
+
+    $("player-score").textContent =
+        "Score: " + gameData.score;
+
+    $("player-coins").textContent =
+        "Coins: " + gameData.coins + " 🪙";
+
+    $("player-power").textContent =
+        "Power: Level " + gameData.powerLevel;
+}
+
+
+/* ---------------------------
+   SIGN UP
+---------------------------- */
+
+function signup() {
+
+    const username =
+        $("username").value.trim();
+
+    const password =
+        $("password").value;
+
+    if (username.length < 3) {
+        setAuthMessage(
+            "Username must be at least 3 characters."
+        );
+        return;
     }
 
-    function createRoom() {
-        let code = Math.floor(100 + Math.random() * 900);
-        currentRoom = "Room_" + code;
-        document.getElementById("room-input").value = code;
-        document.getElementById("log-msg").innerText = `✅ Room ${code} Created! Share code with friends.`;
-        updateDisplay();
+    if (password.length < 4) {
+        setAuthMessage(
+            "Password must be at least 4 characters."
+        );
+        return;
     }
 
-    function joinRoom() {
-        let val = document.getElementById("room-input").value.trim();
-        if(val) {
-            currentRoom = "Room_" + val;
-            document.getElementById("log-msg").innerText = `🚀 Joined Room ${val} with friends successfully!`;
-            updateDisplay();
-        } else {
-            document.getElementById("log-msg").innerText = `⚠️ Please enter a valid room code!`;
-        }
+    const accounts = getAccounts();
+
+    if (accounts[username]) {
+        setAuthMessage(
+            "Username already exists. Try Login."
+        );
+        return;
     }
 
-    function hitTarget() {
-        score += 1;
-        coins += 10;
-        document.getElementById("log-msg").innerText = `🔥 Attack successful in ${currentRoom}! +10 Coins`;
-        updateDisplay();
+    accounts[username] = {
+        password: password,
+        score: 0,
+        coins: 180,
+        powerLevel: 1
+    };
+
+    saveAccounts(accounts);
+
+    localStorage.setItem(
+        SESSION_KEY,
+        username
+    );
+
+    startGame(username);
+}
+
+
+/* ---------------------------
+   LOGIN
+---------------------------- */
+
+function login() {
+
+    const username =
+        $("username").value.trim();
+
+    const password =
+        $("password").value;
+
+    const accounts = getAccounts();
+
+    if (!accounts[username]) {
+        setAuthMessage(
+            "Account not found. Create an account first."
+        );
+        return;
     }
 
-    updateDisplay();
+    if (accounts[username].password !== password) {
+        setAuthMessage(
+            "Incorrect password."
+        );
+        return;
+    }
+
+    localStorage.setItem(
+        SESSION_KEY,
+        username
+    );
+
+    startGame(username);
+}
+
+
+/* ---------------------------
+   START GAME
+---------------------------- */
+
+function startGame(username) {
+
+    const accounts = getAccounts();
+    const account = accounts[username];
+
+    gameData = {
+        username: username,
+        score: account.score || 0,
+        coins: account.coins ?? 180,
+        powerLevel: account.powerLevel || 1
+    };
+
+    hide($("auth-screen"));
+    show($("game-screen"));
+
+    updateGameUI();
+
+    logMessage(
+        "Welcome " + username + "!"
+    );
+}
+
+
+/* ---------------------------
+   SAVE GAME
+---------------------------- */
+
+function saveGame() {
+
+    const accounts = getAccounts();
+
+    if (!accounts[gameData.username]) {
+        return;
+    }
+
+    accounts[gameData.username].score =
+        gameData.score;
+
+    accounts[gameData.username].coins =
+        gameData.coins;
+
+    accounts[gameData.username].powerLevel =
+        gameData.powerLevel;
+
+    saveAccounts(accounts);
+}
+
+
+/* ---------------------------
+   ATTACK
+---------------------------- */
+
+function attack() {
+
+    gameData.score += 1;
+    gameData.coins += 10;
+
+    updateGameUI();
+    saveGame();
+
+    logMessage(
+        "🔥 Attack successful! +10 coins."
+    );
+}
+
+
+/* ---------------------------
+   SHOP
+---------------------------- */
+
+function openShop() {
+
+    if (gameData.coins < 50) {
+
+        logMessage(
+            "❌ Not enough coins."
+        );
+
+        return;
+    }
+
+    gameData.coins -= 50;
+    gameData.powerLevel += 1;
+
+    updateGameUI();
+    saveGame();
+
+    logMessage(
+        "⚡ Power upgraded to Level " +
+        gameData.powerLevel
+    );
+}
+
+
+/* ---------------------------
+   ONLINE BUTTON
+---------------------------- */
+
+function playOnline() {
+
+    logMessage(
+        "🌐 Online matchmaking will connect here."
+    );
+
+    alert(
+        "Online multiplayer backend abhi connect nahi hai. Next step mein hum real matchmaking + realtime server connect karenge."
+    );
+}
+
+
+/* ---------------------------
+   LOGOUT
+---------------------------- */
+
+function logout() {
+
+    saveGame();
+
+    localStorage.removeItem(
+        SESSION_KEY
+    );
+
+    hide($("game-screen"));
+    show($("auth-screen"));
+
+    $("username").value = "";
+    $("password").value = "";
+
+    setAuthMessage(
+        "Logged out successfully."
+    );
+}
+
+
+/* ---------------------------
+   BUTTON EVENTS
+---------------------------- */
+
+$("signup-btn").addEventListener(
+    "click",
+    signup
+);
+
+$("login-btn").addEventListener(
+    "click",
+    login
+);
+
+$("attack-btn").addEventListener(
+    "click",
+    attack
+);
+
+$("shop-btn").addEventListener(
+    "click",
+    openShop
+);
+
+$("online-btn").addEventListener(
+    "click",
+    playOnline
+);
+
+$("logout-btn").addEventListener(
+    "click",
+    logout
+);
+
+
+/* ---------------------------
+   RESTORE SESSION
+---------------------------- */
+
+const savedSession =
+    localStorage.getItem(SESSION_KEY);
+
+if (savedSession) {
+
+    const accounts = getAccounts();
+
+    if (accounts[savedSession]) {
+        startGame(savedSession);
+    } else {
+        localStorage.removeItem(
+            SESSION_KEY
+        );
+    }
+}
 </script>
 
 </body>
