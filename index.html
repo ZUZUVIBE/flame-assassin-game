@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Flame Assassin [Web Edition]</title>
+    <style>
+        body {
+            background-color: #1e1e26;
+            color: #ffffff;
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 20px;
+        }
+        #game-container {
+            max-width: 400px;
+            margin: 0 auto;
+            background: #1f1f2b;
+            border: 2px solid #ff7200;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 0 15px rgba(255, 114, 0, 0.4);
+        }
+        h2 { color: #ff7200; font-size: 18px; margin-bottom: 5px; }
+        .hud { font-size: 13px; color: #cccccc; margin: 8px 0; }
+        .status { font-size: 12px; color: #00ff66; min-height: 35px; margin: 10px 0; font-weight: bold; }
+        input[type="text"] {
+            width: 85%;
+            padding: 8px;
+            margin: 8px 0;
+            background: #2a2a3b;
+            border: 1px solid #444;
+            color: #fff;
+            border-radius: 5px;
+        }
+        button {
+            width: 90%;
+            padding: 10px;
+            margin: 6px 0;
+            border: none;
+            border-radius: 5px;
+            font-weight: bold;
+            cursor: pointer;
+            color: white;
+            transition: 0.2s;
+        }
+        button:active { transform: scale(0.98); }
+        .btn-login { background-color: #ff7200; }
+        .btn-photo { background-color: #0066cc; }
+        .btn-shop { background-color: #cc00cc; }
+        .btn-stealth { background-color: #2e8b57; }
+        .btn-multi { background-color: #4169e1; }
+        .btn-story { background-color: #db7093; }
+        .action-box {
+            background: #252536;
+            border: 2px dashed #ff7200;
+            padding: 20px;
+            margin-top: 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            user-select: none;
+        }
+        .action-box:active { background: #33334d; }
+    </style>
+</head>
+<body>
+
+<div id="game-container">
+    <h2>THE FLAME ASSASSIN [WEB]</h2>
+    <div class="hud" id="hud-id">ID: Loading... | Coins: 150 🪙 | Sunny Day ☀️</div>
+    <div class="hud" id="hud-radar">Radar Active: Secure 🟢 | Badge: Rookie 🥉</div>
+    
+    <input type="text" id="username" placeholder="Enter Email or Username">
+    <br>
+    <button class="btn-login" onclick="handleLogin()">Login ID</button>
+    <button class="btn-photo" onclick="verifyPhoto()">Verify Photo ID</button>
+    <button class="btn-shop" onclick="openShop()">Flame Shop (Upgrade: 50🪙)</button>
+    <button class="btn-stealth" onclick="toggleStealth()">Toggle Stealth / Disguise 👤</button>
+    <button class="btn-multi" onclick="syncMultiplayer()">Sync Online Friends 🌐</button>
+    <button class="btn-story" onclick="storyChoice()">Love Story Choice ❤️</button>
+    
+    <div class="action-box" onclick="tapAction()">
+        🎯 <b>TAP HERE TO ATTACK / PLAY</b>
+    </div>
+    
+    <div class="status" id="status-msg">Status: Login & Verify ID to start playing!</div>
+</div>
+
+<script>
+    let game = {
+        gamerId: "Assassin_" + Math.floor(1000 + Math.random() * 9000),
+        score: 0,
+        level: 1,
+        currency: 150,
+        username: "",
+        isLoggedIn: false,
+        hasPhotoId: false,
+        stealthMode: false,
+        weather: "Sunny Day ☀️",
+        radar: "Radar Active: Secure 🟢",
+        badge: "Badge: Rookie Assassin 🥉",
+        friends: ["Shadow_X", "Viper_99", "BlazeQueen"]
+    };
+
+    function updateHUD() {
+        document.getElementById("hud-id").innerText = `ID: ${game.gamerId} | Coins: ${game.currency}🪙 | ${game.weather}`;
+        document.getElementById("hud-radar").innerText = `${game.radar} | ${game.badge}`;
+    }
+
+    function handleLogin() {
+        let val = document.getElementById("username").value.trim();
+        if (val) {
+            game.username = val;
+            game.isLoggedIn = true;
+            document.getElementById("status-msg").innerText = `Logged in as ${val} [${game.gamerId}]. Saved!`;
+        } else {
+            document.getElementById("status-msg").innerText = `Error: Enter a valid username!`;
+        }
+    }
+
+    function verifyPhoto() {
+        if (!game.isLoggedIn) {
+            document.getElementById("status-msg").innerText = `Error: Complete Login first!`;
+            return;
+        }
+        game.hasPhotoId = true;
+        document.getElementById("status-msg").innerText = `Photo ID Verified! All systems online.`;
+    }
+
+    function openShop() {
+        if (!game.isLoggedIn || !game.hasPhotoId) {
+            document.getElementById("status-msg").innerText = `Error: Verify ID before opening shop!`;
+            return;
+        }
+        if (game.currency >= 50) {
+            game.currency -= 50;
+            updateHUD();
+            document.getElementById("status-msg").innerText = `🔥 Weapon Upgraded! Coins: ${game.currency}🪙`;
+        } else {
+            document.getElementById("status-msg").innerText = `Not enough coins!`;
+        }
+    }
+
+    function toggleStealth() {
+        if (!game.isLoggedIn || !game.hasPhotoId) {
+            document.getElementById("status-msg").innerText = `Error: Login required!`;
+            return;
+        }
+        game.stealthMode = !game.stealthMode;
+        let st = game.stealthMode ? "ACTIVE 🥷" : "INACTIVE";
+        document.getElementById("status-msg").innerText = `Stealth Mode: ${st}`;
+    }
+
+    function syncMultiplayer() {
+        if (!game.isLoggedIn || !game.hasPhotoId) {
+            document.getElementById("status-msg").innerText = `Error: Login required!`;
+            return;
+        }
+        let f = game.friends[Math.floor(Math.random() * game.friends.length)];
+        document.getElementById("status-msg").innerText = `🌐 Multiplayer Drop: Joined with ${f}!`;
+    }
+
+    function storyChoice() {
+        if (!game.isLoggedIn || !game.hasPhotoId) {
+            document.getElementById("status-msg").innerText = `Error: Login required for story mode!`;
+            return;
+        }
+        let choices = [
+            "Story Choice: Trusted Elena ❤️ [Romance Unlocked]",
+            "Story Choice: Went Rogue 🗡️ [Assassin Path Unlocked]",
+            "Story Choice: Shared Intel 🤝 [Alliance Ending Unlocked]"
+        ];
+        let c = choices[Math.floor(Math.random() * choices.length)];
+        document.getElementById("status-msg").innerText = `📖 ${c}`;
+    }
+
+    function tapAction() {
+        if (!game.isLoggedIn || !game.hasPhotoId) {
+            document.getElementById("status-msg").innerText = `⚠️ Login and Verify Photo ID first!`;
+            return;
+        }
+        game.score += 1;
+        game.currency += 5;
+        
+        if (game.score >= 90) game.badge = "Badge: Legend Flame 👑";
+        else if (game.score >= 50) game.badge = "Badge: Master Assassin 🥈";
+
+        if (game.score % 15 === 0) {
+            let weathers = ["Sunny Day ☀️", "Heavy Rain 🌧️", "Midnight Ops 🌙"];
+            game.weather = weathers[Math.floor(Math.random() * weathers.length)];
+            game.radar = "⚠️ CINEMATIC QTE: Action Event!";
+        } else {
+            game.radar = "Radar Active: Secure 🟢";
+        }
+
+        if (game.score % 30 === 0) {
+            game.level += 1;
+            document.getElementById("status-msg").innerText = `⚡ LEVEL UP! Level ${game.level} Reached!`;
+        } else {
+            document.getElementById("status-msg").innerText = `Mission Active | Score: ${game.score} | Level: ${game.level}`;
+        }
+        updateHUD();
+    }
+
+    updateHUD();
+</script>
+
+</body>
+</html>
