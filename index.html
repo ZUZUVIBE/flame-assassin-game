@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>The Flame Assassin [Web Edition]</title>
+    <title>The Flame Assassin [Fixed]</title>
     <style>
         body {
             background-color: #1e1e26;
@@ -24,7 +24,7 @@
         }
         h2 { color: #ff7200; font-size: 18px; margin-bottom: 5px; }
         .hud { font-size: 13px; color: #cccccc; margin: 8px 0; }
-        .status { font-size: 12px; color: #00ff66; min-height: 35px; margin: 10px 0; font-weight: bold; }
+        .status { font-size: 13px; color: #00ff66; min-height: 40px; margin: 10px 0; font-weight: bold; background: #252536; padding: 8px; border-radius: 5px;}
         input[type="text"] {
             width: 85%;
             padding: 8px;
@@ -48,10 +48,6 @@
         button:active { transform: scale(0.98); }
         .btn-login { background-color: #ff7200; }
         .btn-photo { background-color: #0066cc; }
-        .btn-shop { background-color: #cc00cc; }
-        .btn-stealth { background-color: #2e8b57; }
-        .btn-multi { background-color: #4169e1; }
-        .btn-story { background-color: #db7093; }
         .action-box {
             background: #252536;
             border: 2px dashed #ff7200;
@@ -67,24 +63,20 @@
 <body>
 
 <div id="game-container">
-    <h2>THE FLAME ASSASSIN [WEB]</h2>
-    <div class="hud" id="hud-id">ID: Loading... | Coins: 150 🪙 | Sunny Day ☀️</div>
-    <div class="hud" id="hud-radar">Radar Active: Secure 🟢 | Badge: Rookie 🥉</div>
+    <h2>THE FLAME ASSASSIN</h2>
+    <div class="hud" id="hud-id">ID: Loading... | Coins: 150 🪙</div>
+    <div class="hud" id="hud-score">Score: 0 | Level: 1</div>
     
-    <input type="text" id="username" placeholder="Enter Email or Username">
+    <input type="text" id="username" placeholder="Enter Your Name">
     <br>
-    <button class="btn-login" onclick="handleLogin()">Login ID</button>
-    <button class="btn-photo" onclick="verifyPhoto()">Verify Photo ID</button>
-    <button class="btn-shop" onclick="openShop()">Flame Shop (Upgrade: 50🪙)</button>
-    <button class="btn-stealth" onclick="toggleStealth()">Toggle Stealth / Disguise 👤</button>
-    <button class="btn-multi" onclick="syncMultiplayer()">Sync Online Friends 🌐</button>
-    <button class="btn-story" onclick="storyChoice()">Love Story Choice ❤️</button>
+    <button class="btn-login" onclick="handleLogin()">1. Login ID</button>
+    <button class="btn-photo" onclick="verifyPhoto()">2. Verify Photo ID</button>
     
     <div class="action-box" onclick="tapAction()">
         🎯 <b>TAP HERE TO ATTACK / PLAY</b>
     </div>
     
-    <div class="status" id="status-msg">Status: Login & Verify ID to start playing!</div>
+    <div class="status" id="status-msg">Status: Enter name & click Login to start!</div>
 </div>
 
 <script>
@@ -95,110 +87,47 @@
         currency: 150,
         username: "",
         isLoggedIn: false,
-        hasPhotoId: false,
-        stealthMode: false,
-        weather: "Sunny Day ☀️",
-        radar: "Radar Active: Secure 🟢",
-        badge: "Badge: Rookie Assassin 🥉",
-        friends: ["Shadow_X", "Viper_99", "BlazeQueen"]
+        hasPhotoId: false
     };
 
     function updateHUD() {
-        document.getElementById("hud-id").innerText = `ID: ${game.gamerId} | Coins: ${game.currency}🪙 | ${game.weather}`;
-        document.getElementById("hud-radar").innerText = `${game.radar} | ${game.badge}`;
+        document.getElementById("hud-id").innerText = `ID: ${game.gamerId} | Coins: ${game.currency}🪙`;
+        document.getElementById("hud-score").innerText = `Score: ${game.score} | Level: ${game.level}`;
     }
 
     function handleLogin() {
         let val = document.getElementById("username").value.trim();
-        if (val) {
+        if (val !== "") {
             game.username = val;
             game.isLoggedIn = true;
-            document.getElementById("status-msg").innerText = `Logged in as ${val} [${game.gamerId}]. Saved!`;
+            document.getElementById("status-msg").innerText = `Success! Logged in as ${val}. Now click Verify Photo ID.`;
         } else {
-            document.getElementById("status-msg").innerText = `Error: Enter a valid username!`;
+            document.getElementById("status-msg").innerText = `⚠️ Pehle box mein naam toh likho bhai!`;
         }
     }
 
     function verifyPhoto() {
         if (!game.isLoggedIn) {
-            document.getElementById("status-msg").innerText = `Error: Complete Login first!`;
+            document.getElementById("status-msg").innerText = `⚠️ Pehle Login ID karo!`;
             return;
         }
         game.hasPhotoId = true;
-        document.getElementById("status-msg").innerText = `Photo ID Verified! All systems online.`;
-    }
-
-    function openShop() {
-        if (!game.isLoggedIn || !game.hasPhotoId) {
-            document.getElementById("status-msg").innerText = `Error: Verify ID before opening shop!`;
-            return;
-        }
-        if (game.currency >= 50) {
-            game.currency -= 50;
-            updateHUD();
-            document.getElementById("status-msg").innerText = `🔥 Weapon Upgraded! Coins: ${game.currency}🪙`;
-        } else {
-            document.getElementById("status-msg").innerText = `Not enough coins!`;
-        }
-    }
-
-    function toggleStealth() {
-        if (!game.isLoggedIn || !game.hasPhotoId) {
-            document.getElementById("status-msg").innerText = `Error: Login required!`;
-            return;
-        }
-        game.stealthMode = !game.stealthMode;
-        let st = game.stealthMode ? "ACTIVE 🥷" : "INACTIVE";
-        document.getElementById("status-msg").innerText = `Stealth Mode: ${st}`;
-    }
-
-    function syncMultiplayer() {
-        if (!game.isLoggedIn || !game.hasPhotoId) {
-            document.getElementById("status-msg").innerText = `Error: Login required!`;
-            return;
-        }
-        let f = game.friends[Math.floor(Math.random() * game.friends.length)];
-        document.getElementById("status-msg").innerText = `🌐 Multiplayer Drop: Joined with ${f}!`;
-    }
-
-    function storyChoice() {
-        if (!game.isLoggedIn || !game.hasPhotoId) {
-            document.getElementById("status-msg").innerText = `Error: Login required for story mode!`;
-            return;
-        }
-        let choices = [
-            "Story Choice: Trusted Elena ❤️ [Romance Unlocked]",
-            "Story Choice: Went Rogue 🗡️ [Assassin Path Unlocked]",
-            "Story Choice: Shared Intel 🤝 [Alliance Ending Unlocked]"
-        ];
-        let c = choices[Math.floor(Math.random() * choices.length)];
-        document.getElementById("status-msg").innerText = `📖 ${c}`;
+        document.getElementById("status-msg").innerText = `🎉 Verified! Ab niche Target par tap karke khelo!`;
     }
 
     function tapAction() {
         if (!game.isLoggedIn || !game.hasPhotoId) {
-            document.getElementById("status-msg").innerText = `⚠️ Login and Verify Photo ID first!`;
+            document.getElementById("status-msg").innerText = `⚠️ Pehle Login aur Verify karo!`;
             return;
         }
         game.score += 1;
         game.currency += 5;
         
-        if (game.score >= 90) game.badge = "Badge: Legend Flame 👑";
-        else if (game.score >= 50) game.badge = "Badge: Master Assassin 🥈";
-
-        if (game.score % 15 === 0) {
-            let weathers = ["Sunny Day ☀️", "Heavy Rain 🌧️", "Midnight Ops 🌙"];
-            game.weather = weathers[Math.floor(Math.random() * weathers.length)];
-            game.radar = "⚠️ CINEMATIC QTE: Action Event!";
-        } else {
-            game.radar = "Radar Active: Secure 🟢";
-        }
-
-        if (game.score % 30 === 0) {
+        if (game.score % 5 === 0) {
             game.level += 1;
-            document.getElementById("status-msg").innerText = `⚡ LEVEL UP! Level ${game.level} Reached!`;
+            document.getElementById("status-msg").innerText = `⚡ LEVEL UP! Level ${game.level} reached! Score: ${game.score}`;
         } else {
-            document.getElementById("status-msg").innerText = `Mission Active | Score: ${game.score} | Level: ${game.level}`;
+            document.getElementById("status-msg").innerText = `🔥 Attack Successful! Score: ${game.score}`;
         }
         updateHUD();
     }
