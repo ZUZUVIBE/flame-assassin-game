@@ -3,138 +3,96 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>The Flame Assassin</title>
+    <title>The Flame Assassin - Multiplayer</title>
     <style>
         body {
-            background-color: #1a1a24;
+            background-color: #121218;
             color: #ffffff;
-            font-family: Arial, sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             text-align: center;
             margin: 0;
-            padding: 10px;
+            padding: 15px;
         }
-        #game-container {
-            max-width: 400px;
+        .container {
+            max-width: 420px;
             margin: 0 auto;
-            background: #222230;
-            border: 2px solid #ff7200;
-            border-radius: 12px;
-            padding: 15px;
-            box-shadow: 0 0 20px rgba(255, 114, 0, 0.3);
+            background: #1a1a24;
+            border: 2px solid #ff5500;
+            border-radius: 14px;
+            padding: 20px;
+            box-shadow: 0 0 25px rgba(255, 85, 0, 0.4);
         }
-        h2 { color: #ff7200; font-size: 18px; margin: 5px 0 12px 0; }
-        .hud { font-size: 12px; color: #ffcc00; margin: 6px 0; background: #15151c; padding: 6px; border-radius: 6px; }
-        .status { font-size: 12px; color: #00ff66; margin: 10px 0; font-weight: bold; background: #15151c; padding: 8px; border-radius: 6px; min-height: 30px;}
-        button {
-            width: 100%;
-            padding: 10px;
-            margin: 5px 0;
-            border: none;
-            border-radius: 6px;
-            font-weight: bold;
-            cursor: pointer;
-            color: white;
-            font-size: 13px;
-            transition: 0.1s;
-        }
-        button:active { transform: scale(0.98); }
-        .btn-shop { background-color: #9c27b0; }
-        .btn-stealth { background-color: #009688; }
-        .btn-friends { background-color: #3f51b5; }
-        .btn-love { background-color: #e91e63; }
-        
-        .action-box {
-            background: #15151c;
-            border: 2px dashed #ff7200;
-            padding: 15px;
-            margin-top: 10px;
-            border-radius: 8px;
-            cursor: pointer;
-            user-select: none;
-        }
-        .action-box:active { background: #2a2a3b; }
+        h2 { color: #ff5500; margin-bottom: 10px; }
+        .box { background: #222230; padding: 12px; border-radius: 8px; margin: 10px 0; font-size: 14px; }
+        input { width: 80%; padding: 10px; margin: 5px 0; background: #2a2a3b; border: 1px solid #444; color: #fff; border-radius: 6px; text-align: center; font-size: 16px; }
+        button { width: 90%; padding: 12px; margin: 6px 0; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; color: white; font-size: 14px; transition: 0.2s; }
+        button:active { transform: scale(0.97); }
+        .btn-main { background-color: #ff5500; }
+        .btn-room { background-color: #0088ff; }
+        .btn-action { background-color: #00aa44; font-size: 16px; padding: 18px; margin-top: 15px; border: 2px dashed #fff; }
     </style>
 </head>
 <body>
 
-<div id="game-container">
+<div class="container">
     <h2>🔥 THE FLAME ASSASSIN 🔥</h2>
-    <div class="hud" id="hud-main">ID: Loading... | Coins: 150 🪙 | ☀️ Sunny</div>
-    <div class="hud" id="hud-stats">Radar: Secure 🟢 | Rank: Rookie Assassin 🥉</div>
+    <div class="box" id="user-info">ID: Connecting...</div>
     
-    <button class="btn-shop" onclick="openShop()">🛍️ Flame Shop (Upgrade: 50 🪙)</button>
-    <button class="btn-stealth" onclick="toggleStealth()">👤 Toggle Stealth / Disguise</button>
-    <button class="btn-friends" onclick="syncFriends()">🌐 Sync Online Friends</button>
-    <button class="btn-love" onclick="loveChoice()">❤️ Love Story Choice</button>
-    
-    <div class="action-box" onclick="playGame()">
-        🎯 <b style="font-size: 15px;">TAP HERE TO ATTACK / PLAY</b>
+    <div class="box">
+        <b>🌐 Online Friends & Rooms</b><br>
+        <input type="text" id="room-input" placeholder="Enter Room Code (e.g. 1234)">
+        <button class="btn-room" onclick="joinRoom()">Join Friend's Room</button>
+        <button class="btn-room" onclick="createRoom()" style="background-color: #9c27b0;">Create New Room</button>
     </div>
+
+    <button class="btn-action" onclick="hitTarget()">🎯 TAP HERE TO ATTACK!</button>
     
-    <div class="status" id="status-msg">Status: System Online. Tap target to play!</div>
+    <div class="box" id="game-stats">
+        Score: 0 | Coins: 100 🪙 | Room: Solo
+    </div>
+    <div id="log-msg" style="color: #00ff66; font-size: 13px; font-weight: bold; margin-top: 10px;">Status: Ready for action!</div>
 </div>
 
 <script>
-    let game = {
-        gamerId: "Assassin_" + Math.floor(1000 + Math.random() * 9000),
-        score: 0,
-        level: 1,
-        coins: 150,
-        stealthMode: false,
-        powerUps: 0
-    };
+    // Unique ID generation without annoying forms
+    let myId = "Assassin_" + Math.floor(1000 + Math.random() * 9000);
+    let score = 0;
+    let coins = 100;
+    let currentRoom = "Solo";
 
-    function updateUI() {
-        document.getElementById("hud-main").innerText = `ID: ${game.gamerId} | Coins: ${game.coins} 🪙 | Score: ${game.score}`;
-        document.getElementById("hud-stats").innerText = `Radar: Secure 🟢 | Level: ${game.level} | Power: ${game.powerUps}`;
+    document.getElementById("user-info").innerText = `My ID: ${myId}`;
+
+    function updateDisplay() {
+        document.getElementById("game-stats").innerText = `Score: ${score} | Coins: ${coins} 🪙 | Room: ${currentRoom}`;
     }
 
-    function playGame() {
-        game.score += 1;
-        game.coins += 10;
-        
-        if(game.score % 5 === 0) {
-            game.level += 1;
-            document.getElementById("status-msg").innerText = `⚡ LEVEL UP! Reached Level ${game.level}!`;
+    function createRoom() {
+        let code = Math.floor(100 + Math.random() * 900);
+        currentRoom = "Room_" + code;
+        document.getElementById("room-input").value = code;
+        document.getElementById("log-msg").innerText = `✅ Room ${code} Created! Share code with friends.`;
+        updateDisplay();
+    }
+
+    function joinRoom() {
+        let val = document.getElementById("room-input").value.trim();
+        if(val) {
+            currentRoom = "Room_" + val;
+            document.getElementById("log-msg").innerText = `🚀 Joined Room ${val} with friends successfully!`;
+            updateDisplay();
         } else {
-            document.getElementById("status-msg").innerText = `🔥 Attack successful! +10 Coins earned!`;
+            document.getElementById("log-msg").innerText = `⚠️ Please enter a valid room code!`;
         }
-        updateUI();
     }
 
-    function openShop() {
-        if(game.coins >= 50) {
-            game.coins -= 50;
-            game.powerUps += 1;
-            document.getElementById("status-msg").innerText = `🛒 Shop Upgrade Purchased! Power-ups: ${game.powerUps}`;
-        } else {
-            document.getElementById("status-msg").innerText = `⚠️ Not enough coins! Need 50 🪙.`;
-        }
-        updateUI();
+    function hitTarget() {
+        score += 1;
+        coins += 10;
+        document.getElementById("log-msg").innerText = `🔥 Attack successful in ${currentRoom}! +10 Coins`;
+        updateDisplay();
     }
 
-    function toggleStealth() {
-        game.stealthMode = !game.stealthMode;
-        let modeStr = game.stealthMode ? "ACTIVE (Invisible to Enemies)" : "OFF";
-        document.getElementById("status-msg").innerText = `👤 Stealth Mode is now ${modeStr}`;
-    }
-
-    function syncFriends() {
-        let randomFriends = Math.floor(3 + Math.random() * 8);
-        document.getElementById("status-msg").innerText = `🌐 Synced! ${randomFriends} online assassin friends active near you.`;
-    }
-
-    function loveChoice() {
-        let choices = [
-            "❤️ Alliance formed with rival assassin shadow!",
-            "💔 Choice declined: Mission comes first, no distractions.",
-            "💖 Secret letter received from the target informant!"
-        ];
-        let randomStory = choices[Math.floor(Math.random() * choices.length)];
-        document.getElementById("status-msg").innerText = randomStory;
-    }
-
-    updateUI();
+    updateDisplay();
 </script>
 
 </body>
