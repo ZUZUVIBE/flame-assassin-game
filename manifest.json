@@ -1,0 +1,12 @@
+{
+  "background_color": "#ffffff",
+  "dir": "ltr",
+  "display": "standalone",
+  "name": "The Flame Assassin",
+  "orientation": "any",
+  "scope": "/",
+  "short_name": "FlameAssassin",
+  "start_url": "/",
+  "theme_color": "#ffffff",
+  "description": "An action-packed web game"
+}
